@@ -16,7 +16,7 @@ SYMBOL = "AAPL"
 def fetch_data(symbol):
     data = yf.download(symbol, start="2022-01-01", end=datetime.today().strftime("%Y-%m-%d"))
     close = data['Close']
-    data['SMA_10'] = SMAIndicator(close=close).sma_indicator()
+    data['SMA_10'] = SMAIndicator(close=close, window=10).sma_indicator()
     data['SMA_50'] = SMAIndicator(close=close, window=50).sma_indicator()
     data['RSI'] = RSIIndicator(close=close).rsi()
     data['MACD'] = MACD(close=close).macd()
