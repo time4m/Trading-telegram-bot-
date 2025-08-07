@@ -1,0 +1,27 @@
+name: Daily Trading Bot
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Runs daily at 8:30 AM IST
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install yfinance pandas ta scikit-learn python-telegram-bot==20.3
+
+    - name: Run the bot
+      run: python trading_bot.py
+      
