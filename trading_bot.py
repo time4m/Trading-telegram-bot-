@@ -10,8 +10,15 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
-# List of working US stock symbols
-SYMBOLS = ["AAPL", "TSLA", "MSFT", "AMZN", "GOOGL", "NVDA"]
+# Safe, Vested-supported US stock symbols
+SYMBOLS = [
+    "AAPL",  # Apple
+    "MSFT",  # Microsoft
+    "GOOGL", # Alphabet
+    "AMZN",  # Amazon
+    "NVDA",  # NVIDIA
+    "META"   # Meta Platforms
+]
 
 # Fetch data safely
 def fetch_data(symbol):
