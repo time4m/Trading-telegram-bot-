@@ -25,7 +25,7 @@ def get_signal(symbol):
     if len(data) < 50:
         return None
 
-    latest_price_usd = round(data["Close"].iloc[-1], 2)
+    latest_price_usd = round(float(data["Close"].iloc[-1]), 2)
     latest_price_inr = round(latest_price_usd * USD_TO_INR, 2)
 
     latest_sma10 = data["SMA_10"].iloc[-1]
