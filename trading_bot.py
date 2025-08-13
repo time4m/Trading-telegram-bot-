@@ -38,10 +38,14 @@ def fetch_data(symbol):
 
 # Generate buy/sell/hold signal
 def generate_signal(data):
-    latest = data.iloc[-1]
-    if latest["SMA_10"] > latest["SMA_50"] and latest["MACD"] > latest["Signal"]:
+    latest_sma10 = data["SMA_10"].iloc[-1]
+    latest_sma50 = data["SMA_50"].iloc[-1]
+    latest_macd = data["MACD"].iloc[-1]
+    latest_signal = data["Signal"].iloc[-1]
+
+    if latest_sma10 > latest_sma50 and latest_macd > latest_signal:
         return "BUY"
-    elif latest["SMA_10"] < latest["SMA_50"] and latest["MACD"] < latest["Signal"]:
+    elif latest_sma10 < latest_sma50 and latest_macd < latest_signal:
         return "SELL"
     else:
         return "HOLD"
