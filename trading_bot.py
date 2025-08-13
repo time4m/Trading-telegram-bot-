@@ -9,7 +9,7 @@ from datetime import datetime
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-# Symbols list
+# Symbols list (Vested-supported)
 SYMBOLS = ["META", "AAPL", "MSFT", "GOOG"]
 
 # USD to INR rate
@@ -42,11 +42,21 @@ def get_signal(symbol):
     else:
         return None
 
-    return f"{emoji} {action} {symbol} at ${latest_price_usd} (₹{latest_price_inr})"
+    time_now = datetime.now().strftime("%Y-%m-%d %H:%M IST")
+    vested_link = f"https://app.vested.co.in/explore/{symbol}"
+
+    return f"{emoji} {action} {symbol} at ${latest_price_usd} (₹{latest_price_inr})\nTime: {time_now}\nLink: {vested_link}"
 
 async def main():
     for symbol in SYMBOLS:
         signal = get_signal(symbol)
         if signal:
-            time_now = datetime.now().strftime("%Y-%m-%d %H:%M IST")
-            vested_link = f"https://app.vested.co.in
+            send_telegram(signal)
+
+def send_telegram(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    requests.post(url, json=payload)
+
+if __name__ == "__main__":
+    asyncio.run(main())
