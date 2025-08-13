@@ -2,9 +2,8 @@ name: Run Trading Bot
 
 on:
   schedule:
-    - cron: "0 3 * * *"    # Daily at 03:00 UTC (≈ 8:30 AM IST)
-  workflow_dispatch:       # Allow manual run from Actions UI
-
+    - cron: "30 14 * * 1-5"  # 2:30 PM UTC = 7:00 PM IST, Mon-Fri
+  workflow_dispatch: # Allows manual run
 jobs:
   run-bot:
     runs-on: ubuntu-latest
