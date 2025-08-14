@@ -48,8 +48,9 @@ async def main():
         print("ℹ No clear BUY/SELL signal today.")
         return
 
-    last_price = data["Close"].iloc[-1]
-    last_price_inr = last_price * USD_INR
+    # Get last row values as floats
+    last_price = float(data["Close"].iloc[-1])
+    last_price_inr = float(last_price * USD_INR)
 
     # Get emoji
     emoji = "📈" if signal == "BUY" else "📉"
@@ -69,7 +70,3 @@ async def main():
     )
 
     await send_telegram_message(message)
-
-# ==== RUN ====
-if __name__ == "__main__":
-    asyncio.run(main())
