@@ -52,6 +52,7 @@ async def main():
     last_price = float(data["Close"].iloc[-1])
     last_price_inr = float(last_price * USD_INR)
 
+
     # Get emoji
     emoji = "📈" if signal == "BUY" else "📉"
 
