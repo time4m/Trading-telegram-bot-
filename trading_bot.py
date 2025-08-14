@@ -1,69 +1,75 @@
 import yfinance as yf
-import pandas as pd
 import asyncio
-import os
+import aiohttp
 from datetime import datetime
 import pytz
-import aiohttp
 
-# Telegram settings from environment
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SYMBOL = os.getenv("SYMBOL", "META")
+# ==== CONFIG ====
+SYMBOL = "META"  # Change to any stock symbol
+TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+CHAT_ID = "YOUR_CHAT_ID"
+USD_INR = 84.25  # Update with latest rate
 
-# Fetch historical data
+# ==== FETCH DATA ====
 def fetch_data(symbol):
-    data = yf.download(symbol, period="3mo", interval="1d")
-    data["SMA_10"] = data["Close"].rolling(window=10).mean()
-    data["SMA_50"] = data["Close"].rolling(window=50).mean()
-    data["EMA_12"] = data["Close"].ewm(span=12, adjust=False).mean()
-    data["EMA_26"] = data["Close"].ewm(span=26, adjust=False).mean()
-    data["MACD"] = data["EMA_12"] - data["EMA_26"]
-    data["Signal"] = data["MACD"].ewm(span=9, adjust=False).mean()
+    data = yf.download(symbol.strip(), period="3mo", interval="1d")
+    if data.empty:
+        print(f"⚠ No data found for {symbol}")
+        return None
     return data
 
-# Generate buy/sell signal
-def generate_signal(df):
-    latest = df.iloc[-1]
-    if latest["SMA_10"] > latest["SMA_50"] and latest["MACD"] > latest["Signal"]:
-        return "BUY", latest["Close"]
-    elif latest["SMA_10"] < latest["SMA_50"] and latest["MACD"] < latest["Signal"]:
-        return "SELL", latest["Close"]
+# ==== STRATEGY (Simple Moving Average Crossover) ====
+def generate_signal(data):
+    data["SMA_5"] = data["Close"].rolling(window=5).mean()
+    data["SMA_20"] = data["Close"].rolling(window=20).mean()
+    if data["SMA_5"].iloc[-1] > data["SMA_20"].iloc[-1]:
+        return "BUY"
+    elif data["SMA_5"].iloc[-1] < data["SMA_20"].iloc[-1]:
+        return "SELL"
     else:
-        return None, latest["Close"]
+        return None
 
-# Convert USD to INR
-def usd_to_inr(usd):
-    rate = 83.0  # static conversion rate
-    return round(usd * rate, 2)
-
-# Send message to Telegram
+# ==== SEND TO TELEGRAM ====
 async def send_telegram_message(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     async with aiohttp.ClientSession() as session:
-        await session.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message})
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {"chat_id": CHAT_ID, "text": message}
+        async with session.post(url, data=payload) as resp:
+            print("✅ Telegram sent:", await resp.text())
 
-# Main process
+# ==== MAIN ====
 async def main():
     data = fetch_data(SYMBOL)
-    signal, price_usd = generate_signal(data)
+    if data is None:
+        return  # Skip if no data
 
-    if signal:
-        emoji = "📈" if signal == "BUY" else "📉"
-        price_inr = usd_to_inr(price_usd)
-        ist_time = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M IST")
-        vested_link = f"https://app.vested.co.in/explore/{SYMBOL}"
+    signal = generate_signal(data)
+    if signal is None:
+        print("ℹ No clear BUY/SELL signal today.")
+        return
 
-        message = (
-            f"{emoji} {signal} {SYMBOL}\n"
-            f"Price: ${price_usd:.2f} (₹{price_inr:,.2f})\n"
-            f"Time: {ist_time}\n"
-            f"Link: {vested_link}"
-        )
+    last_price = data["Close"].iloc[-1]
+    last_price_inr = last_price * USD_INR
 
-        await send_telegram_message(message)
-    else:
-        print("No trading signal generated.")
+    # Get emoji
+    emoji = "📈" if signal == "BUY" else "📉"
 
+    # Time in IST
+    ist_time = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M IST")
+
+    # Vested Link
+    vested_link = f"https://app.vested.co.in/explore/{SYMBOL}"
+
+    # Final message format
+    message = (
+        f"{emoji} {signal} {SYMBOL}\n"
+        f"Price: ${last_price:.2f} (₹{last_price_inr:,.2f})\n"
+        f"Time: {ist_time}\n"
+        f"Link: {vested_link}"
+    )
+
+    await send_telegram_message(message)
+
+# ==== RUN ====
 if __name__ == "__main__":
     asyncio.run(main())
