@@ -1,4 +1,4 @@
-iimport yfinance as yf
+import yfinance as yf
 import pandas as pd
 import pytz
 from datetime import datetime
