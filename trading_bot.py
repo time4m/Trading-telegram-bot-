@@ -9,14 +9,6 @@ SYMBOL = "META"  # Fixed stock symbol
 USD_INR = 84.2   # Update with current USD to INR rate
 BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
-# ====================
-
-async def send_telegram_message(message: str):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=payload) as resp:
-            return await resp.text()
 
 # ==== FETCH DATA ====
 def fetch_data(symbol):
@@ -38,12 +30,12 @@ def generate_signal(data):
         return None
 
 # ==== SEND TO TELEGRAM ====
-async def send_telegram_message(message):
+async def send_telegram_message(message: str):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
     async with aiohttp.ClientSession() as session:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        payload = {"chat_id": CHAT_ID, "text": message}
         async with session.post(url, data=payload) as resp:
-            print("✅ Telegram sent:", await resp.text())
+            return await resp.text()
 
 # ==== MAIN ====
 async def main():
