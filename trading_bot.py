@@ -57,16 +57,6 @@ async def send_telegram_photo():
         async with aiohttp.ClientSession() as session:
             await session.post(url, data=data)
 
-async def send_telegram_photo():
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
-    with open("chart.png", "rb") as photo:
-        data = aiohttp.FormData()
-        data.add_field('chat_id', CHAT_ID)
-        data.add_field('photo', photo, filename="chart.png", content_type='image/png')
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=data) as resp:
-                print(await resp.text())
-
 # ==== MAIN ====
 async def main():
     data = fetch_data(SYMBOL)
