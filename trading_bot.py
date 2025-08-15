@@ -3,13 +3,6 @@ import asyncio
 import aiohttp
 from datetime import datetime
 import pytz
-import os
-import sys
-
-SYMBOL = os.getenv("SYMBOL", "").strip()
-if not SYMBOL:
-    print("❌ ERROR: SYMBOL environment variable is not set.")
-    sys.exit(1)  # Stop the bot so you see the error in logs
     
 # ==== CONFIG ====
 SYMBOL = "META"  # Change to any stock symbol
