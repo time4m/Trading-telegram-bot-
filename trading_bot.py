@@ -48,12 +48,14 @@ def save_chart(data, signal):
     plt.savefig("chart.png")
 
 # ==== SEND TO TELEGRAM ====
-async def send_telegram_message(message: str):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=payload) as resp:
-            print(await resp.text())
+async def send_telegram_photo():
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+    with open("chart.png", "rb") as photo:
+        data = aiohttp.FormData()
+        data.add_field('chat_id', CHAT_ID)
+        data.add_field('photo', photo, filename="chart.png", content_type='image/png')
+        async with aiohttp.ClientSession() as session:
+            await session.post(url, data=data)
 
 async def send_telegram_photo():
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
