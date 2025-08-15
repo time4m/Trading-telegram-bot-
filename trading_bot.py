@@ -1,14 +1,22 @@
 import yfinance as yf
+import yfinance as yf
+import requests
 import asyncio
-import aiohttp
 from datetime import datetime
-import pytz
-    
-# ==== CONFIG ====
-SYMBOL = "META"  # Change to any stock symbol
-TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-CHAT_ID = "YOUR_CHAT_ID"
-USD_INR = 84.25  # Update with latest rate
+
+# ===== SETTINGS =====
+SYMBOL = "META"  # Fixed stock symbol
+USD_INR = 84.2   # Update with current USD to INR rate
+BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
+# ====================
+
+async def send_telegram_message(message: str):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=payload) as resp:
+            return await resp.text()
 
 # ==== FETCH DATA ====
 def fetch_data(symbol):
