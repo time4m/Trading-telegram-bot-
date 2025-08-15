@@ -1,14 +1,15 @@
 import yfinance as yf
-import yfinance as yf
 import requests
 import asyncio
+import aiohttp
+import pytz
 from datetime import datetime
 
 # ===== SETTINGS =====
 SYMBOL = "META"  # Fixed stock symbol
 USD_INR = 84.2   # Update with current USD to INR rate
-BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
+BOT_TOKEN = "8493905949:AAGQ6HwbiCTfD06Qyi3BzbEU2mOknvQT1Ts"
+CHAT_ID = "5570545756"
 
 # ==== FETCH DATA ====
 def fetch_data(symbol):
@@ -18,7 +19,7 @@ def fetch_data(symbol):
         return None
     return data
 
-# ==== STRATEGY (Simple Moving Average Crossover) ====
+# ==== STRATEGY ====
 def generate_signal(data):
     data["SMA_5"] = data["Close"].rolling(window=5).mean()
     data["SMA_20"] = data["Close"].rolling(window=20).mean()
@@ -41,28 +42,20 @@ async def send_telegram_message(message: str):
 async def main():
     data = fetch_data(SYMBOL)
     if data is None:
-        return  # Skip if no data
+        return
 
     signal = generate_signal(data)
     if signal is None:
         print("ℹ No clear BUY/SELL signal today.")
         return
 
-    # Get last row values as floats
     last_price = float(data["Close"].iloc[-1])
     last_price_inr = float(last_price * USD_INR)
 
-
-    # Get emoji
     emoji = "📈" if signal == "BUY" else "📉"
-
-    # Time in IST
     ist_time = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M IST")
-
-    # Vested Link
     vested_link = f"https://app.vested.co.in/explore/{SYMBOL}"
 
-    # Final message format
     message = (
         f"{emoji} {signal} {SYMBOL}\n"
         f"Price: ${last_price:.2f} (₹{last_price_inr:,.2f})\n"
@@ -71,3 +64,6 @@ async def main():
     )
 
     await send_telegram_message(message)
+
+if __name__ == "__main__":
+    asyncio.run(main())
